@@ -1,0 +1,19 @@
+[
+    {
+        "name": "Dave Hawkins",
+        "spotify_id": "1cmyHQDqeBFVzWHeekwGaa",
+        "threads": "iamdavehawkins",
+        "bandcamp_domain": "iamdavehawkins"
+    },
+    {
+        "name": "Example Artist 1",
+        "spotify_id": "4Z8W4fKeB5YxbusRsdQVPb",
+        "threads": "example_artist1",
+        "bandcamp_domain": "exampleartist1"
+    },
+    {
+        "name": "Example Artist 2",
+        "spotify_id": "0Y5tJX1MQlPlqiwlOH1tJY",
+        "threads": "example_artist2"
+    }
+]
