@@ -12,6 +12,7 @@ import os
 import json
 import datetime
 import argparse
+import random
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -188,6 +189,8 @@ def update_playlists(sp, config, rr_playlist_tracks, all_playlist_tracks):
     # Add new tracks to the recent releases playlist
     if new_rr_tracks:
         print(f"Adding {len(new_rr_tracks)} tracks to the recent releases playlist")
+        # Randomize the order of the tracks
+        random.shuffle(new_rr_tracks)
         sp.playlist_add_items(config['rr_playlist_id'], [track[0] for track in new_rr_tracks], position=0)
         print("Recent releases playlist updated successfully!")
     
