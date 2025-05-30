@@ -24,7 +24,7 @@ from spotipy_utils import (
 )
 
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv(override=True)
 
 def parse_arguments():
     """Parse command line arguments."""
@@ -42,11 +42,12 @@ def get_config(args):
         'client_secret': os.environ.get('SPOTIFY_CLIENT_SECRET'),
         'rr_playlist_id': os.environ.get('SPOTIFY_RR_PLAYLIST_ID'),
         'all_playlist_id': os.environ.get('SPOTIFY_ALL_PLAYLIST_ID'),
-        'n_days_ago': int(os.environ.get('DAYS_LOOKBACK', 14)),
+        'n_days_ago': int(os.environ.get('DAYS_LOOKBACK', 13)),
         'artists_file': os.environ.get('ARTISTS_FILE', 'artists.json'),
-        'dry_run': args.dry_run
+        'dry_run': args.dry_run,
+        'exclude_ai': os.environ.get('EXCLUDE_AI', True)
     }
-    
+
     # Validate required configuration
     missing_config = [key for key, value in config.items() 
                      if value is None and key not in ['dry_run']]
@@ -57,12 +58,15 @@ def get_config(args):
         exit(1)
     return config
 
-def load_artists(file_path):
+def load_artists(file_path, exclude_ai):
     """Load artists from JSON file."""
     try:
         with open(file_path, 'r') as f:
             artists = json.load(f)
         print(f"Loaded {len(artists)} artists from {file_path}")
+        # remove artists with heavy ai_usage
+        if exclude_ai:
+            artists = [artist for artist in artists if not artist.get('ai_usage') or artist['ai_usage'] != 'heavy']
         return artists
     except FileNotFoundError:
         print(f"Error: Artists file not found at {file_path}")
@@ -165,8 +169,8 @@ def update_playlists(sp, config, rr_playlist_tracks, all_playlist_tracks):
                       if track[0] not in [existing_track['track']['id'] 
                                           for existing_track in existing_all_playlist_tracks]]
     
-    print(f"{len(new_rr_tracks)} new tracks released in the last {config['n_days_ago']} days")
-    print(f"{len(new_all_tracks)} new tracks released this year")
+    print(f"{len(new_rr_tracks)} tracks will be added to the recent releases playlist")
+    print(f"{len(new_all_tracks)} tracks will be added to the all tracks playlist")
     
     if config['dry_run']:
         print("DRY RUN: No changes will be made to playlists")
@@ -232,7 +236,7 @@ def main():
     config = get_config(args)
     
     # Load artists from JSON file
-    artists = load_artists(config['artists_file'])
+    artists = load_artists(config['artists_file'], config['exclude_ai'])
     
     # Initialize Spotify client
     sp = initialize_spotify_client(config['client_id'], config['client_secret'])
